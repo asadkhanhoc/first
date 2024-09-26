@@ -37,6 +37,10 @@ public class Launcher : MonoBehaviourPunCallbacks
     private bool hasSetNick;
 
     public string levelToPlay;
+    public GameObject startButton;
+
+    public GameObject roomTestButton;
+
 
     // Start is called before the first frame update
     void Start()
@@ -47,6 +51,11 @@ public class Launcher : MonoBehaviourPunCallbacks
         loadingText.text = "Connecting To Network...";
 
         PhotonNetwork.ConnectUsingSettings();
+
+#if UNITY_EDITOR
+        roomTestButton.SetActive(true);
+#endif
+
     }
 
     void CloseMenus()
@@ -124,6 +133,15 @@ public class Launcher : MonoBehaviourPunCallbacks
         roomNameText.text = PhotonNetwork.CurrentRoom.Name;
 
         ListAllPlayers();
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+            startButton.SetActive(true);
+        }
+        else
+        {
+            startButton.SetActive(false);
+        }
 
     }
 
@@ -256,6 +274,29 @@ public class Launcher : MonoBehaviourPunCallbacks
         PhotonNetwork.LoadLevel(levelToPlay);
     }
 
+    public override void OnMasterClientSwitched(Player newMasterClient)
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            startButton.SetActive(true);
+        }
+        else
+        {
+            startButton.SetActive(false);
+        }
+    }
+
+    public void QuickJoin()
+    {
+
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 8;
+
+        PhotonNetwork.CreateRoom("test", options);
+        CloseMenus();
+        loadingText.text = "Creating Room...";
+        loadingScreen.SetActive(true);
+    }
     public void QuitGame()
     {
         Application.Quit();

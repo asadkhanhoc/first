@@ -461,6 +461,8 @@ MonoBehaviour:
   - {fileID: 668157744}
   - {fileID: 903359840}
   - {fileID: 875473959}
+  playerHitImpact: {fileID: 0}
+  maxHealth: 100
 --- !u!143 &101089546
 CharacterController:
   m_ObjectHideFlags: 0
@@ -503,6 +505,7 @@ MonoBehaviour:
   timeBetweenShots: 0.1
   heatPerShot: 1
   muzzleFlash: {fileID: 0}
+  shotDamage: 0
 --- !u!1 &105378010
 GameObject:
   m_ObjectHideFlags: 0
@@ -850,6 +853,7 @@ MonoBehaviour:
   timeBetweenShots: 0.1
   heatPerShot: 1
   muzzleFlash: {fileID: 0}
+  shotDamage: 0
 --- !u!1 &422837709
 GameObject:
   m_ObjectHideFlags: 0
@@ -884,6 +888,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   overheatedMessage: {fileID: 105378011}
   weaponTempSlider: {fileID: 1887353379}
+  deathScreen: {fileID: 0}
+  deathtext: {fileID: 0}
+  healthSlider: {fileID: 0}
 --- !u!114 &422837711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1267,6 +1274,7 @@ MonoBehaviour:
   timeBetweenShots: 0.1
   heatPerShot: 1
   muzzleFlash: {fileID: 0}
+  shotDamage: 0
 --- !u!1 &668157742
 GameObject:
   m_ObjectHideFlags: 0
@@ -1317,6 +1325,7 @@ MonoBehaviour:
   timeBetweenShots: 0.1
   heatPerShot: 2
   muzzleFlash: {fileID: 157452721}
+  shotDamage: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1566,6 +1575,7 @@ MonoBehaviour:
   timeBetweenShots: 0.25
   heatPerShot: 2
   muzzleFlash: {fileID: 1250192169}
+  shotDamage: 0
 --- !u!1 &903359838
 GameObject:
   m_ObjectHideFlags: 0
@@ -1616,6 +1626,7 @@ MonoBehaviour:
   timeBetweenShots: 0.1
   heatPerShot: 1
   muzzleFlash: {fileID: 1791049411}
+  shotDamage: 0
 --- !u!1 &906555860
 GameObject:
   m_ObjectHideFlags: 0
@@ -2864,6 +2875,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2035739175}
+  - component: {fileID: 2035739177}
+  - component: {fileID: 2035739176}
   m_Layer: 0
   m_Name: Gun Holder
   m_TagString: Untagged
@@ -2889,6 +2902,70 @@ Transform:
   - {fileID: 875473958}
   m_Father: {fileID: 1560335479}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &2035739176
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035739174}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &2035739177
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035739174}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1 &2046251063
 GameObject:
   m_ObjectHideFlags: 0
