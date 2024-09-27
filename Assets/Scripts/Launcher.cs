@@ -34,12 +34,15 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public GameObject nameInputScreen;
     public TMP_InputField nameInput;
-    private bool hasSetNick;
+    public static bool hasSetNick;
 
     public string levelToPlay;
     public GameObject startButton;
 
     public GameObject roomTestButton;
+
+    public string[] allMaps;
+    public bool changeMapBetweenRounds = true;
 
 
     // Start is called before the first frame update
@@ -55,7 +58,8 @@ public class Launcher : MonoBehaviourPunCallbacks
 #if UNITY_EDITOR
         roomTestButton.SetActive(true);
 #endif
-
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     void CloseMenus()
@@ -271,7 +275,9 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public void StartGame()
     {
-        PhotonNetwork.LoadLevel(levelToPlay);
+        //PhotonNetwork.LoadLevel(levelToPlay);
+
+        PhotonNetwork.LoadLevel(allMaps[Random.Range(0, allMaps.Length)]);
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
