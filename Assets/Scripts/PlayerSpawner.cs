@@ -6,6 +6,7 @@ using Photon.Pun;
 public class PlayerSpawner : MonoBehaviour
 {
     public static PlayerSpawner instance;
+
     private void Awake()
     {
         instance = this;
@@ -21,7 +22,7 @@ public class PlayerSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (PhotonNetwork.IsConnected)
+        if(PhotonNetwork.IsConnected)
         {
             SpawnPlayer();
         }
@@ -31,12 +32,14 @@ public class PlayerSpawner : MonoBehaviour
     {
         Transform spawnPoint = SpawnManager.instance.GetSpawnPoint();
 
-       player =  PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, spawnPoint.rotation);
+        player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position, spawnPoint.rotation);
     }
 
     public void Die(string damager)
     {
-        UIController.instance.deathtext.text = "You were killed by " + damager;
+
+
+        UIController.instance.deathText.text = "You were killed by " + damager;
 
         //PhotonNetwork.Destroy(player);
 
@@ -44,11 +47,10 @@ public class PlayerSpawner : MonoBehaviour
 
         MatchManager.instance.UpdateStatsSend(PhotonNetwork.LocalPlayer.ActorNumber, 1, 1);
 
-        if (player != null)
+        if(player != null)
         {
             StartCoroutine(DieCo());
         }
-
     }
 
     public IEnumerator DieCo()
@@ -56,9 +58,7 @@ public class PlayerSpawner : MonoBehaviour
         PhotonNetwork.Instantiate(deathEffect.name, player.transform.position, Quaternion.identity);
 
         PhotonNetwork.Destroy(player);
-
         player = null;
-
         UIController.instance.deathScreen.SetActive(true);
 
         yield return new WaitForSeconds(respawnTime);

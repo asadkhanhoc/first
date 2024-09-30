@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private Camera cam;
 
-    public float jumpForce = 12f , gravityMod = 2.5f;
+    public float jumpForce = 12f, gravityMod = 2.5f;
 
     public Transform groundCheckPoint;
     private bool isGrounded;
@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     public float muzzleDisplayTime;
     private float muzzleCounter;
 
-    public float maxHeat = 10f, /*heatPerShot = 1f,*/ coolRate = 4f, overheatCoolRate = 5f;
+    public float maxHeat = 10f, /*heatPerShot = 1f, */ coolRate = 4f, overheatCoolRate = 5f;
     private float heatCounter;
     private bool overHeated;
 
@@ -45,9 +45,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private int currentHealth;
 
     public Animator anim;
-
     public GameObject playerModel;
     public Transform modelGunPoint, gunHolder;
+
+    public Material[] allSkins;
+
+    public float adsSpeed = 5f;
+    public Transform adsInPoint, adsOutPoint;
+
+    public AudioSource footstepSlow, footstepFast;
 
     // Start is called before the first frame update
     void Start()
@@ -67,21 +73,20 @@ public class PlayerController : MonoBehaviourPunCallbacks
         //transform.position = newTrans.position;
         //transform.rotation = newTrans.rotation;
 
-        if (photonView.IsMine)
+        if(photonView.IsMine)
         {
             playerModel.SetActive(false);
 
-
             UIController.instance.healthSlider.maxValue = maxHealth;
             UIController.instance.healthSlider.value = currentHealth;
-
-        }
-        else
+        } else
         {
             gunHolder.parent = modelGunPoint;
             gunHolder.localPosition = Vector3.zero;
             gunHolder.localRotation = Quaternion.identity;
         }
+
+        playerModel.GetComponent<Renderer>().material = allSkins[photonView.Owner.ActorNumber % allSkins.Length];
     }
 
     // Update is called once per frame
@@ -92,7 +97,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
             mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * mouseSensitivity;
 
-            transform.rotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + mouseInput.x, transform.eulerAngles.z);
+            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + mouseInput.x, transform.rotation.eulerAngles.z);
 
             verticalRotStore += mouseInput.y;
             verticalRotStore = Mathf.Clamp(verticalRotStore, -60f, 60f);
@@ -111,10 +116,28 @@ public class PlayerController : MonoBehaviourPunCallbacks
             if (Input.GetKey(KeyCode.LeftShift))
             {
                 activeMoveSpeed = runSpeed;
+
+                if(!footstepFast.isPlaying && moveDir != Vector3.zero)
+                {
+                    footstepFast.Play();
+                    footstepSlow.Stop();
+                }
             }
             else
             {
                 activeMoveSpeed = moveSpeed;
+
+                if (!footstepSlow.isPlaying && moveDir != Vector3.zero)
+                { 
+                    footstepFast.Stop();
+                    footstepSlow.Play();
+                }
+            }
+
+            if(moveDir == Vector3.zero || !isGrounded)
+            {
+                footstepSlow.Stop();
+                footstepFast.Stop();
             }
 
             float yVel = movement.y;
@@ -146,8 +169,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
                     allGuns[selectedGun].muzzleFlash.SetActive(false);
                 }
             }
+
             if (!overHeated)
             {
+
                 if (Input.GetMouseButtonDown(0))
                 {
                     Shoot();
@@ -161,7 +186,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
                     {
                         Shoot();
                     }
-
                 }
 
                 heatCounter -= coolRate * Time.deltaTime;
@@ -169,7 +193,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
             else
             {
                 heatCounter -= overheatCoolRate * Time.deltaTime;
-
                 if (heatCounter <= 0)
                 {
                     overHeated = false;
@@ -178,11 +201,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 }
             }
 
-            if (heatCounter <= 0)
+            if (heatCounter < 0)
             {
                 heatCounter = 0f;
             }
-
             UIController.instance.weaponTempSlider.value = heatCounter;
 
 
@@ -194,7 +216,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 {
                     selectedGun = 0;
                 }
-
                 //SwitchGun();
                 photonView.RPC("SetGun", RpcTarget.All, selectedGun);
 
@@ -207,7 +228,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 {
                     selectedGun = allGuns.Length - 1;
                 }
-
                 //SwitchGun();
                 photonView.RPC("SetGun", RpcTarget.All, selectedGun);
             }
@@ -227,19 +247,30 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
 
 
+            if(Input.GetMouseButton(1))
+            {
+                cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, allGuns[selectedGun].adsZoom, adsSpeed * Time.deltaTime);
+                gunHolder.position = Vector3.Lerp(gunHolder.position, adsInPoint.position, adsSpeed * Time.deltaTime);
+            } else
+            {
+                cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, 60f, adsSpeed * Time.deltaTime);
+                gunHolder.position = Vector3.Lerp(gunHolder.position, adsOutPoint.position, adsSpeed * Time.deltaTime);
+            }
+
+
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Cursor.lockState = CursorLockMode.None;
             }
             else if (Cursor.lockState == CursorLockMode.None)
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonDown(0) && !UIController.instance.optionsScreen.activeInHierarchy)
                 {
                     Cursor.lockState = CursorLockMode.Locked;
                 }
             }
         }
-
     }
 
     private void Shoot()
@@ -247,13 +278,13 @@ public class PlayerController : MonoBehaviourPunCallbacks
         Ray ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, 0f));
         ray.origin = cam.transform.position;
 
-        if(Physics.Raycast(ray, out RaycastHit hit ))
+        if(Physics.Raycast(ray, out RaycastHit hit))
         {
-            //Debug.Log("We hit" + hit.collider.gameObject.name);
+            //Debug.Log("We hit " + hit.collider.gameObject.name);
 
             if (hit.collider.gameObject.tag == "Player")
             {
-                Debug.Log("Hit "+ hit.collider.gameObject.GetPhotonView().Owner.NickName);
+                Debug.Log("Hit " + hit.collider.gameObject.GetPhotonView().Owner.NickName);
 
                 PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.identity);
 
@@ -261,6 +292,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             }
             else
             {
+
                 GameObject bulletImpactObject = Instantiate(bulletImpact, hit.point + (hit.normal * .002f), Quaternion.LookRotation(hit.normal, Vector3.up));
 
                 Destroy(bulletImpactObject, 10f);
@@ -268,6 +300,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
 
         shotCounter = allGuns[selectedGun].timeBetweenShots;
+
 
         heatCounter += allGuns[selectedGun].heatPerShot;
         if(heatCounter >= maxHeat)
@@ -280,22 +313,23 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
 
         allGuns[selectedGun].muzzleFlash.SetActive(true);
-
         muzzleCounter = muzzleDisplayTime;
 
+        allGuns[selectedGun].shotSound.Stop();
+        allGuns[selectedGun].shotSound.Play();
     }
 
     [PunRPC]
-    public void DealDamage(string damager, int damageAmountt, int actor)
+    public void DealDamage(string damager, int damageAmount, int actor)
     {
-        TakeDamage(damager, damageAmountt, actor);
+        TakeDamage(damager, damageAmount, actor);
     }
 
-    public void TakeDamage(string damagerr, int damageAmount, int actor)
+    public void TakeDamage(string damager, int damageAmount, int actor)
     {
         if (photonView.IsMine)
         {
-            //Debug.Log(photonView.Owner.NickName + " has been hit by " + damagerr);
+            //Debug.Log(photonView.Owner.NickName + " has been hit by " + damager);
 
             currentHealth -= damageAmount;
 
@@ -303,16 +337,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
             {
                 currentHealth = 0;
 
-                PlayerSpawner.instance.Die(damagerr);
+                PlayerSpawner.instance.Die(damager);
 
                 MatchManager.instance.UpdateStatsSend(actor, 0, 1);
             }
 
-            UIController.instance.healthSlider.value = currentHealth;
 
+            UIController.instance.healthSlider.value = currentHealth;
         }
     }
-
 
     private void LateUpdate()
     {
@@ -322,8 +355,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             {
                 cam.transform.position = viewPoint.position;
                 cam.transform.rotation = viewPoint.rotation;
-            }
-            else
+            } else
             {
                 cam.transform.position = MatchManager.instance.mapCamPoint.position;
                 cam.transform.rotation = MatchManager.instance.mapCamPoint.rotation;
@@ -346,7 +378,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [PunRPC]
     public void SetGun(int gunToSwitchTo)
     {
-        if (gunToSwitchTo < allGuns.Length)
+        if(gunToSwitchTo < allGuns.Length)
         {
             selectedGun = gunToSwitchTo;
             SwitchGun();

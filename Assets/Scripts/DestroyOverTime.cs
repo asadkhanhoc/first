@@ -10,7 +10,6 @@ public class DestroyOverTime : MonoBehaviour
     void Start()
     {
         Destroy(gameObject, lifetime);
-
     }
 
     // Update is called once per frame
